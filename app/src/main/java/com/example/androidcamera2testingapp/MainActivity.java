@@ -80,73 +80,20 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    CameraManager cameraManager;
 
     private void openCamera() throws CameraAccessException {
 
-        cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         cameraId = cameraManager.getCameraIdList()[0];
 
         CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
         StreamConfigurationMap streamConfigurationMap = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
         imageDimensions = streamConfigurationMap.getOutputSizes(SurfaceTexture.class)[0];
 
+        cameraManager.openCamera(cameraId, stateCallback, null);
 
-
-            // Here, thisActivity is the current activity
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                // Permission is not granted
-                // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.CAMERA)) {
-                    Log.wtf("tag", "hey");
-                } else {
-                    // No explanation needed; request the permission
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.CAMERA},
-                            22);
-
-                    Log.wtf("tag", "requesting permission");
-                }
-            } else {
-                cameraManager.openCamera(cameraId, stateCallback, null);
-                Log.wtf("tag", "already granted");
-            }
-
-        }
-
-
-    @SuppressLint("MissingPermission")
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        switch (requestCode) {
-            case 22: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    Log.wtf("tag", "granted");
-
-                    try {
-                        cameraManager.openCamera(cameraId, stateCallback, null);
-                    } catch (CameraAccessException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Log.wtf("tag", "denied");
-                }
-                return;
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request.
-        }
     }
+
 
     CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
         @Override
@@ -177,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         SurfaceTexture surfaceTexture = textureView.getSurfaceTexture();
         surfaceTexture.setDefaultBufferSize(imageDimensions.getWidth(), imageDimensions.getHeight());
 
-        Surface surface =  new Surface(surfaceTexture);
+        Surface surface = new Surface(surfaceTexture);
 
         captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
 
@@ -187,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onConfigured(@NonNull CameraCaptureSession session) {
 
-                if (cameraDevice == null){
+                if (cameraDevice == null) {
                     return;
                 }
 
@@ -210,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updatePreview() throws CameraAccessException {
 
-        if (cameraDevice == null){
+        if (cameraDevice == null) {
             return;
         }
 
@@ -224,13 +171,13 @@ public class MainActivity extends AppCompatActivity {
         super.onRestart();
         startBackgroundThread();
 
-        if (textureView.isAvailable()){
+        if (textureView.isAvailable()) {
             try {
                 openCamera();
             } catch (CameraAccessException e) {
                 e.printStackTrace();
             }
-        }else {
+        } else {
             textureView.setSurfaceTextureListener(surfaceTextureListener);
         }
     }
@@ -256,12 +203,11 @@ public class MainActivity extends AppCompatActivity {
     private void stopBackgroundThread() throws InterruptedException {
 
 
-            handlerThread.quitSafely();
-            handlerThread.join();
+        handlerThread.quitSafely();
+        handlerThread.join();
 
-            backgroundHandler = null;
-            handlerThread = null;
-
+        backgroundHandler = null;
+        handlerThread = null;
 
 
     }
